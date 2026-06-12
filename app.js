@@ -1,6 +1,5 @@
 const $ = id => document.getElementById(id);
 const KEY = 'ai-terminal-v2';
-
 const PRICE_MAP = {};
 
 const state = {
@@ -15,7 +14,6 @@ const state = {
 };
 
 function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
-
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
@@ -36,20 +34,19 @@ async function loadModels() {
       PRICE_MAP[m.id] = { in: m.price_in, out: m.price_out };
       const opt = document.createElement('option');
       opt.value = m.id;
-      opt.textContent = `${m.label}  ($${m.price_in}/$${m.price_out} /M)`;
+      opt.textContent = `${m.label}  ($${m.price_in}/$${m.price_out}/M)`;
       if (m.id === state.settings.model) opt.selected = true;
       sel.appendChild(opt);
     });
     updateModelLabel();
-  } catch (e) {
+  } catch {
     $('modelSelect').innerHTML = '<option value="deepseek/deepseek-chat-v3-0324">DeepSeek V3</option>';
   }
 }
 
 function updateModelLabel() {
   const sel = $('modelSelect');
-  const label = sel.options[sel.selectedIndex]?.text || state.settings.model;
-  $('modelLabel').textContent = label;
+  $('modelLabel').textContent = sel.options[sel.selectedIndex]?.text || state.settings.model;
 }
 
 function renderSettings() {
@@ -61,9 +58,9 @@ function renderSettings() {
 }
 
 function estimateCost(usage, modelId) {
-  const prices = PRICE_MAP[modelId];
-  if (!prices || !usage) return null;
-  const cost = (usage.prompt_tokens / 1e6) * prices.in + (usage.completion_tokens / 1e6) * prices.out;
+  const p = PRICE_MAP[modelId];
+  if (!p || !usage) return null;
+  const cost = (usage.prompt_tokens / 1e6) * p.in + (usage.completion_tokens / 1e6) * p.out;
   return cost < 0.0001 ? '<$0.0001' : `$${cost.toFixed(4)}`;
 }
 
@@ -73,37 +70,33 @@ function renderMessages() {
   state.messages.forEach(m => {
     const wrap = document.createElement('div');
     wrap.className = `msg-wrap ${m.role}`;
-
     const msg = document.createElement('div');
     msg.className = 'msg';
     msg.textContent = m.content;
     wrap.appendChild(msg);
-
     if (m.reasoning) {
       const toggle = document.createElement('button');
       toggle.className = 'reasoning-toggle';
-      toggle.textContent = '> [thinking] afficher le raisonnement';
+      toggle.textContent = '> [thinking] afficher';
       const block = document.createElement('div');
       block.className = 'reasoning-block hidden';
       block.textContent = m.reasoning;
       toggle.addEventListener('click', () => {
-        const hidden = block.classList.toggle('hidden');
-        toggle.textContent = hidden ? '> [thinking] afficher le raisonnement' : '> [thinking] masquer le raisonnement';
+        const h = block.classList.toggle('hidden');
+        toggle.textContent = h ? '> [thinking] afficher' : '> [thinking] masquer';
       });
       wrap.appendChild(toggle);
       wrap.appendChild(block);
     }
-
     if (m.meta) {
       const meta = document.createElement('div');
       meta.className = 'msg-meta';
       meta.textContent = m.meta;
       wrap.appendChild(meta);
     }
-
     chat.appendChild(wrap);
   });
-  chat.scrollTop = chat.scrollHeight;
+  $('chat').scrollTop = $('chat').scrollHeight;
 }
 
 function addMsg(role, content, extras = {}) {
@@ -118,12 +111,10 @@ function getMcpTools() {
 
 function buildSystemPrompt() {
   let sys = state.settings.systemPrompt;
-  if (state.settings.memoryFacts.trim()) {
-    sys += '\n\nFaits importants sur l utilisateur :\n' + state.settings.memoryFacts.trim();
-  }
-  if (state.settings.summaryMemory) {
-    sys += '\n\nResume de la conversation precedente :\n' + state.settings.summaryMemory;
-  }
+  if (state.settings.memoryFacts.trim())
+    sys += '\n\nFaits importants :\n' + state.settings.memoryFacts.trim();
+  if (state.settings.summaryMemory)
+    sys += '\n\nResume precedent :\n' + state.settings.summaryMemory;
   return sys;
 }
 
@@ -134,34 +125,67 @@ async function maybeSummarize() {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: state.settings.model,
-        systemPrompt: 'Resumes cette conversation en 5 lignes maximum, en francais.',
-        messages: [{ role: 'user', content: last20 }]
-      })
+      body: JSON.stringify({ model: state.settings.model, systemPrompt: 'Resumes cette conversation en 5 lignes.', messages: [{ role: 'user', content: last20 }] })
     });
     const data = await res.json();
-    if (data.content) {
-      state.settings.summaryMemory = data.content;
-      save();
-    }
+    if (data.content) { state.settings.summaryMemory = data.content; save(); }
   } catch {}
 }
 
-async function callMcpTool(tool, userMsg) {
+// --- DEBUG ---
+async function runDiagnostic() {
+  $('d-model').textContent = state.settings.model;
+  $('d-memory').textContent = state.messages.length + ' messages';
+
+  // Test backend
   try {
-    const res = await fetch(tool.url, {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: userMsg })
+      body: JSON.stringify({ model: state.settings.model, messages: [{ role: 'user', content: 'ping' }], systemPrompt: 'Reponds juste: pong' })
     });
-    return await res.text();
+    const data = await res.json();
+    if (res.ok && data.content) {
+      $('d-backend').textContent = 'OK';
+      $('d-backend').className = 'status-ok';
+      $('d-apikey').textContent = 'detectee et valide';
+      $('d-apikey').className = 'status-ok';
+      $('d-functions').textContent = 'chat actif';
+      $('d-functions').className = 'status-ok';
+    } else if (data.error && data.error.includes('OPENROUTER_API_KEY')) {
+      $('d-backend').textContent = 'actif';
+      $('d-backend').className = 'status-ok';
+      $('d-apikey').textContent = 'manquante';
+      $('d-apikey').className = 'status-err';
+      $('d-functions').textContent = 'chat actif';
+      $('d-functions').className = 'status-ok';
+    } else {
+      $('d-backend').textContent = 'erreur: ' + (data.error || res.status);
+      $('d-backend').className = 'status-err';
+      $('d-apikey').textContent = 'inconnue';
+      $('d-apikey').className = 'status-pending';
+      $('d-functions').textContent = 'probleme';
+      $('d-functions').className = 'status-err';
+    }
   } catch (e) {
-    return `Erreur MCP (${tool.name}): ${e.message}`;
+    $('d-backend').textContent = 'inaccessible';
+    $('d-backend').className = 'status-err';
+    $('d-apikey').textContent = 'inconnue';
+    $('d-apikey').className = 'status-pending';
+    $('d-functions').textContent = 'non deployees';
+    $('d-functions').className = 'status-err';
   }
 }
 
-$('toggleSettings').addEventListener('click', () => $('settings').classList.toggle('hidden'));
+$('toggleDebug').addEventListener('click', () => {
+  $('debugPanel').classList.toggle('hidden');
+  $('settings').classList.add('hidden');
+});
+$('toggleSettings').addEventListener('click', () => {
+  $('settings').classList.toggle('hidden');
+  $('debugPanel').classList.add('hidden');
+});
+$('runTest').addEventListener('click', runDiagnostic);
 
 $('modelSelect').addEventListener('change', updateModelLabel);
 
@@ -171,7 +195,7 @@ $('saveSettings').addEventListener('click', () => {
   state.settings.memoryFacts = $('memoryFacts').value.trim();
   state.settings.mcpConfig = $('mcpConfig').value.trim() || '[]';
   save();
-  updateModelLabel();
+  renderSettings();
   $('settings').classList.add('hidden');
   addMsg('assistant', 'Configuration sauvegardee. Modele : ' + state.settings.model);
 });
@@ -204,20 +228,18 @@ $('composer').addEventListener('submit', async e => {
 
   const tools = getMcpTools();
   let mcpResult = null;
-  if (tools.length) {
-    for (const tool of tools) {
-      if (content.toLowerCase().includes(tool.name.toLowerCase())) {
-        mcpResult = await callMcpTool(tool, content);
-        break;
-      }
+  for (const tool of tools) {
+    if (content.toLowerCase().includes(tool.name.toLowerCase())) {
+      try {
+        const r = await fetch(tool.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: content }) });
+        mcpResult = await r.text();
+      } catch (err) { mcpResult = `Erreur MCP: ${err.message}`; }
+      break;
     }
   }
 
-  const messages = state.messages
-    .filter(m => m.role === 'user' || m.role === 'assistant')
-    .map(({ role, content }) => ({ role, content }));
-
-  if (mcpResult) messages.push({ role: 'user', content: `Resultat de l outil : ${mcpResult}` });
+  const messages = state.messages.filter(m => m.role === 'user' || m.role === 'assistant').map(({ role, content }) => ({ role, content }));
+  if (mcpResult) messages.push({ role: 'user', content: `Resultat outil: ${mcpResult}` });
 
   const start = Date.now();
 
@@ -225,27 +247,17 @@ $('composer').addEventListener('submit', async e => {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: state.settings.model,
-        systemPrompt: buildSystemPrompt(),
-        messages,
-        mcpTools: tools
-      })
+      body: JSON.stringify({ model: state.settings.model, systemPrompt: buildSystemPrompt(), messages, mcpTools: tools })
     });
 
     typing.remove();
 
-    if (!res.ok) {
-      const err = await res.json();
-      addMsg('assistant', 'Erreur : ' + (err.error || res.status));
-      return;
-    }
-
     const data = await res.json();
+    if (!res.ok) { addMsg('assistant', 'Erreur : ' + (data.error || res.status)); return; }
+
     const elapsed = ((Date.now() - start) / 1000).toFixed(1);
     const u = data.usage || {};
     const cost = estimateCost(u, data.model || state.settings.model);
-
     const metaParts = [
       new Date().toLocaleTimeString(),
       data.model || state.settings.model,
@@ -254,13 +266,8 @@ $('composer').addEventListener('submit', async e => {
       `${elapsed}s`
     ].filter(Boolean);
 
-    addMsg('assistant', data.content, {
-      reasoning: data.reasoning || null,
-      meta: metaParts.join('  |  ')
-    });
-
+    addMsg('assistant', data.content, { reasoning: data.reasoning || null, meta: metaParts.join('  |  ') });
     await maybeSummarize();
-
   } catch (err) {
     typing.remove();
     addMsg('assistant', 'Erreur reseau : ' + err.message);
@@ -270,6 +277,4 @@ $('composer').addEventListener('submit', async e => {
 load();
 loadModels().then(() => renderSettings());
 renderMessages();
-if (!state.messages.length) {
-  addMsg('assistant', 'Terminal pret. Configure le modele dans [ config ] puis commence.');
-}
+if (!state.messages.length) addMsg('assistant', 'Terminal pret. Configure dans [ config ] puis ecris.');
