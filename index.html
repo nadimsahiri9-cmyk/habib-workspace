@@ -13,7 +13,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <span class="logo">⬡ AI Terminal</span>
-        <button class="icon-btn" id="closeSidebar" title="Fermer">✕</button>
+        <button class="icon-btn" id="closeSidebar">✕</button>
       </div>
 
       <div class="sidebar-section">
@@ -25,29 +25,30 @@
       </div>
 
       <div class="sidebar-section">
-        <div class="section-label">Outils MCP actifs</div>
+        <div class="section-label">Outils actifs</div>
         <div id="mcpActiveList" class="mcp-active-list"></div>
-        <button class="sidebar-btn" id="openMcpPanel">+ Ajouter outil</button>
+        <button class="sidebar-btn" id="openMcpPanel">+ Gérer les outils</button>
       </div>
 
       <div class="sidebar-section">
         <div class="section-label">Actions rapides</div>
         <button class="sidebar-btn" id="sidebarSearch">🔍 Recherche web</button>
         <button class="sidebar-btn" id="sidebarBrowse">🌐 Lire une URL</button>
-        <button class="sidebar-btn" id="sidebarCode">⚙ Generer du code</button>
+        <button class="sidebar-btn" id="sidebarCode">⚙ Générer du code</button>
+        <button class="sidebar-btn" id="sidebarTerminal">$ Terminal</button>
       </div>
 
       <div class="sidebar-section">
         <div class="section-label">Logs</div>
         <div id="logList" class="log-list"></div>
-        <button class="sidebar-btn danger" id="clearChat">✕ Effacer</button>
+        <button class="sidebar-btn danger" id="clearChat">✕ Effacer la conv</button>
       </div>
     </aside>
 
     <!-- MAIN -->
     <div class="main">
       <header class="topbar">
-        <button class="icon-btn" id="openSidebar" title="Menu">☰</button>
+        <button class="icon-btn" id="openSidebar">☰</button>
         <div class="topbar-center">
           <select id="modelSelect" class="model-select"></select>
         </div>
@@ -60,16 +61,16 @@
           <span>Configuration</span>
           <button class="icon-btn" id="closeSettings">✕</button>
         </div>
-        <label>Prompt systeme
-          <textarea id="systemPrompt" rows="4">Tu es une IA experte, precise et concise. Tu reponds en francais. Quand on te demande de rechercher ou de lire une page, utilise les outils disponibles.</textarea>
+        <label>Prompt système
+          <textarea id="systemPrompt" rows="4"></textarea>
         </label>
-        <label>Memoire persistante
-          <textarea id="memoryFacts" rows="3" placeholder="Ton prenom, contexte projet..."></textarea>
+        <label>Mémoire persistante
+          <textarea id="memoryFacts" rows="3" placeholder="Ton prénom, contexte projet..."></textarea>
         </label>
         <label>SearXNG URL (optionnel)
           <input type="text" id="searxngUrl" placeholder="https://ton-searxng.com" />
         </label>
-        <label>Terminal webhook (optionnel)
+        <label>Terminal webhook URL
           <input type="text" id="terminalUrl" placeholder="https://ton-vps.com/exec" />
         </label>
         <button class="btn-primary" id="saveSettings">Sauvegarder</button>
@@ -78,30 +79,40 @@
       <!-- MCP PANEL -->
       <div id="mcpPanel" class="overlay-panel hidden">
         <div class="panel-header">
-          <span>Ajouter un outil MCP</span>
+          <span>Outils MCP</span>
           <button class="icon-btn" id="closeMcpPanel">✕</button>
         </div>
-        <label>Nom (mot cle declencheur)
-          <input type="text" id="mcpName" placeholder="ex: meteo" />
+
+        <div class="mcp-presets">
+          <div class="section-label">Intégrations prêtes</div>
+          <div class="preset-grid">
+            <button class="preset-btn" data-preset="search">🔍 Web</button>
+            <button class="preset-btn" data-preset="browse">🌐 Browse</button>
+            <button class="preset-btn" data-preset="terminal">$ Terminal</button>
+            <button class="preset-btn" data-preset="notion">📝 Notion</button>
+            <button class="preset-btn" data-preset="github">🐙 GitHub</button>
+            <button class="preset-btn" data-preset="n8n">⚡ N8N</button>
+            <button class="preset-btn" data-preset="telegram">✈ Telegram</button>
+            <button class="preset-btn" data-preset="applenotes">🍎 Notes</button>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:12px">Outil personnalisé</div>
+        <label>Nom (mot clé)
+          <input type="text" id="mcpName" placeholder="ex: notion" />
         </label>
         <label>Description
-          <input type="text" id="mcpDesc" placeholder="retourne la meteo actuelle" />
+          <input type="text" id="mcpDesc" placeholder="sauvegarde dans Notion" />
         </label>
         <label>URL endpoint
           <input type="text" id="mcpUrl" placeholder="https://..." />
         </label>
-        <label>Methode
+        <label>Méthode
           <select id="mcpMethod"><option>POST</option><option>GET</option></select>
         </label>
-        <label>Headers JSON (optionnel)
+        <label>Headers JSON
           <input type="text" id="mcpHeaders" placeholder='{"Authorization": "Bearer token"}' />
         </label>
-        <div class="mcp-presets">
-          <div class="section-label">Presets rapides</div>
-          <button class="preset-btn" data-preset="search">🔍 Recherche web</button>
-          <button class="preset-btn" data-preset="browse">🌐 Lire URL</button>
-          <button class="preset-btn" data-preset="terminal">⚙ Terminal VPS</button>
-        </div>
         <button class="btn-primary" id="saveMcp">Ajouter</button>
         <div id="mcpList" class="mcp-list"></div>
       </div>
@@ -111,9 +122,10 @@
 
       <!-- COMPOSER -->
       <form id="composer" class="composer">
-        <div class="composer-tools">
+        <div class="composer-tools" id="composerTools">
           <button type="button" class="tool-btn" id="btnSearch" title="Recherche web">🔍</button>
           <button type="button" class="tool-btn" id="btnBrowse" title="Lire URL">🌐</button>
+          <button type="button" class="tool-btn" id="btnTerminal" title="Terminal">$</button>
           <button type="button" class="tool-btn" id="btnCode" title="Code">⚙</button>
         </div>
         <textarea id="messageInput" rows="1" placeholder="Message..."></textarea>
