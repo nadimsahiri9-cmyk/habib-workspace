@@ -15,36 +15,20 @@ exports.handler = async (event) => {
 
   let systemContent = systemPrompt || 'Tu es une IA utile. Reponds en francais.';
   if (mcpTools && mcpTools.length)
-    systemContent += '\n\nOutils MCP:\n' + mcpTools.map(t => `- ${t.name}: ${t.description}`).join('\n');
+    systemContent += '\n\nOutils disponibles:\n' + mcpTools.map(t => `- ${t.name}: ${t.description}`).join('\n');
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://mobile-ai-chat.netlify.app',
-        'X-Title': 'Mobile AI Chat'
-      },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemContent }, ...messages],
-        include_reasoning: true
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': 'https://mobile-ai-chat.netlify.app', 'X-Title': 'AI Terminal' },
+      body: JSON.stringify({ model, messages: [{ role: 'system', content: systemContent }, ...messages], include_reasoning: true })
     });
-
     const data = await response.json();
     if (!response.ok) return { statusCode: response.status, headers, body: JSON.stringify({ error: JSON.stringify(data) }) };
-
     const choice = data.choices?.[0];
     return {
       statusCode: 200, headers,
-      body: JSON.stringify({
-        content: choice?.message?.content || '',
-        reasoning: choice?.message?.reasoning || '',
-        model: data.model || model,
-        usage: data.usage || {}
-      })
+      body: JSON.stringify({ content: choice?.message?.content || '', reasoning: choice?.message?.reasoning || '', model: data.model || model, usage: data.usage || {} })
     };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
