@@ -3,50 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Mobile AI Chat</title>
+  <title>AI Terminal</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app">
+
     <header class="topbar">
       <div>
-        <h1>Mobile AI Chat</h1>
-        <p id="modelLabel">modèle chargement...</p>
+        <h1>AI Terminal</h1>
+        <div class="sub" id="modelLabel">chargement...</div>
       </div>
-      <button id="toggleSettings" class="ghost">⚙️</button>
+      <button id="toggleSettings">[ config ]</button>
     </header>
 
-    <section id="settings" class="card settings hidden">
-      <label>Clé API OpenRouter
-        <input id="apiKey" type="password" placeholder="sk-or-v1-..." />
+    <section id="settings" class="settings hidden">
+
+      <label>Modele
+        <select id="modelSelect"></select>
       </label>
-      <label>Modèle
-        <select id="modelSelect">
-          <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
-          <option value="anthropic/claude-3.5-sonnet">anthropic/claude-3.5-sonnet</option>
-          <option value="qwen/qwen-2.5-72b-instruct">qwen/qwen-2.5-72b-instruct</option>
-          <option value="meta-llama/llama-3.3-70b-instruct">meta-llama/llama-3.3-70b-instruct</option>
-          <option value="mistralai/mistral-7b-instruct">mistralai/mistral-7b-instruct</option>
-        </select>
+
+      <label>Prompt systeme
+        <textarea id="systemPrompt" rows="3">Tu es une IA utile, concise et claire. Reponds en francais.</textarea>
       </label>
-      <label>Prompt système
-        <textarea id="systemPrompt" rows="3">Tu es une IA utile, concise et claire. Réponds en français.</textarea>
+
+      <label>Memoire — faits persistants
+        <textarea id="memoryFacts" rows="3" placeholder="Ton prenom, tes projets, tes preferences..."></textarea>
       </label>
-      <label>MCP config (JSON)
-        <textarea id="mcpConfig" rows="5" placeholder='[{"name":"weather","description":"donne la météo","url":"https://..."}]'></textarea>
+
+      <label>MCP tools (JSON)
+        <textarea id="mcpConfig" rows="4" placeholder='[{"name":"meteo","description":"retourne la meteo","url":"https://..."}]'></textarea>
       </label>
-      <div class="row">
-        <button id="saveSettings">💾 Sauvegarder</button>
-        <button id="clearChat" class="danger">🗑 Effacer</button>
+
+      <div class="btn-row">
+        <button class="primary" id="saveSettings">[ sauvegarder ]</button>
+        <button class="danger-btn" id="clearChat">[ effacer chat ]</button>
       </div>
+
     </section>
 
     <main id="chat" class="chat"></main>
 
     <form id="composer" class="composer">
-      <textarea id="messageInput" rows="1" placeholder="Écris ici..."></textarea>
-      <button type="submit">➤</button>
+      <textarea id="messageInput" rows="1" placeholder="..."></textarea>
+      <button type="submit">[ envoyer ]</button>
     </form>
+
   </div>
   <script src="app.js"></script>
 </body>
