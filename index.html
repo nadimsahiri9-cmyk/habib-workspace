@@ -8,7 +8,6 @@
 </head>
 <body>
   <div class="app">
-
     <header class="topbar">
       <div>
         <h1>AI Terminal</h1>
@@ -20,46 +19,21 @@
       </div>
     </header>
 
-    <!-- DEBUG -->
     <section id="debugPanel" class="panel debug-panel hidden">
       <h2>Diagnostic</h2>
-      <div class="debug-row">
-        <span class="debug-label">Backend /api/chat</span>
-        <span id="d-backend" class="status-pending">--</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">Cle API OpenRouter</span>
-        <span id="d-apikey" class="status-pending">--</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">Modele actif</span>
-        <span id="d-model">--</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">Fonctions detectees</span>
-        <span id="d-functions" class="status-pending">--</span>
-      </div>
-      <div class="debug-row">
-        <span class="debug-label">Memoire messages</span>
-        <span id="d-memory">--</span>
-      </div>
+      <div class="debug-row"><span class="debug-label">Backend /api/chat</span><span id="d-backend" class="status-pending">--</span></div>
+      <div class="debug-row"><span class="debug-label">Cle API OpenRouter</span><span id="d-apikey" class="status-pending">--</span></div>
+      <div class="debug-row"><span class="debug-label">Modele actif</span><span id="d-model">--</span></div>
+      <div class="debug-row"><span class="debug-label">Fonctions detectees</span><span id="d-functions" class="status-pending">--</span></div>
+      <div class="debug-row"><span class="debug-label">Memoire messages</span><span id="d-memory">--</span></div>
       <button class="run-test" id="runTest">[ lancer le test ]</button>
     </section>
 
-    <!-- CONFIG -->
     <section id="settings" class="panel hidden">
-      <label>Modele
-        <select id="modelSelect"></select>
-      </label>
-      <label>Prompt systeme
-        <textarea id="systemPrompt" rows="3">Tu es une IA utile, concise et claire. Reponds en francais.</textarea>
-      </label>
-      <label>Memoire — faits persistants
-        <textarea id="memoryFacts" rows="3" placeholder="Ton prenom, tes projets, tes preferences..."></textarea>
-      </label>
-      <label>MCP tools (JSON)
-        <textarea id="mcpConfig" rows="4" placeholder='[{"name":"meteo","description":"retourne la meteo","url":"https://..."}]'></textarea>
-      </label>
+      <label>Modele<select id="modelSelect"></select></label>
+      <label>Prompt systeme<textarea id="systemPrompt" rows="3">Tu es une IA utile, concise et claire. Reponds en francais.</textarea></label>
+      <label>Memoire — faits persistants<textarea id="memoryFacts" rows="3" placeholder="Ton prenom, tes projets..."></textarea></label>
+      <label>MCP tools (JSON)<textarea id="mcpConfig" rows="4" placeholder='[{"name":"meteo","description":"retourne la meteo","url":"https://..."}]'></textarea></label>
       <div class="btn-row">
         <button class="primary" id="saveSettings">[ sauvegarder ]</button>
         <button class="danger-btn" id="clearChat">[ effacer ]</button>
@@ -72,7 +46,6 @@
       <textarea id="messageInput" rows="1" placeholder="..."></textarea>
       <button type="submit">envoyer</button>
     </form>
-
   </div>
   <script src="app.js"></script>
 </body>

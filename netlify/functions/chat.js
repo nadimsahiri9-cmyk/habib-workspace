@@ -1,11 +1,5 @@
-const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args)).catch(() => globalThis.fetch(...args));
-
 exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json'
-  };
-
+  const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
@@ -24,7 +18,7 @@ exports.handler = async (event) => {
     systemContent += '\n\nOutils MCP:\n' + mcpTools.map(t => `- ${t.name}: ${t.description}`).join('\n');
 
   try {
-    const response = await globalThis.fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,8 +38,7 @@ exports.handler = async (event) => {
 
     const choice = data.choices?.[0];
     return {
-      statusCode: 200,
-      headers,
+      statusCode: 200, headers,
       body: JSON.stringify({
         content: choice?.message?.content || '',
         reasoning: choice?.message?.reasoning || '',
