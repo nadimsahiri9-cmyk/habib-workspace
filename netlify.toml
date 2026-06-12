@@ -6,8 +6,10 @@
   from = "/api/chat"
   to = "/.netlify/functions/chat"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/api/models"
   to = "/.netlify/functions/models"
   status = 200
+  force = true
