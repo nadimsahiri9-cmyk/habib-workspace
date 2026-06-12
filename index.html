@@ -7,45 +7,119 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div>
-        <h1>AI Terminal</h1>
-        <div class="sub" id="modelLabel">chargement...</div>
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">⬡ AI Terminal</span>
+        <button class="icon-btn" id="closeSidebar" title="Fermer">✕</button>
       </div>
-      <div class="topbar-btns">
-        <button class="tbtn" id="toggleDebug">[ debug ]</button>
-        <button class="tbtn" id="toggleSettings">[ config ]</button>
+
+      <div class="sidebar-section">
+        <div class="section-label">Session</div>
+        <div class="stat-row"><span>Tokens</span><span id="s-tokens">0</span></div>
+        <div class="stat-row"><span>Cout</span><span id="s-cost">$0.0000</span></div>
+        <div class="stat-row"><span>Messages</span><span id="s-msgs">0</span></div>
+        <div class="stat-row"><span>Modele</span><span id="s-model" class="truncate">--</span></div>
       </div>
-    </header>
 
-    <section id="debugPanel" class="panel debug-panel hidden">
-      <h2>Diagnostic</h2>
-      <div class="debug-row"><span class="debug-label">Backend /api/chat</span><span id="d-backend" class="status-pending">--</span></div>
-      <div class="debug-row"><span class="debug-label">Cle API OpenRouter</span><span id="d-apikey" class="status-pending">--</span></div>
-      <div class="debug-row"><span class="debug-label">Modele actif</span><span id="d-model">--</span></div>
-      <div class="debug-row"><span class="debug-label">Fonctions detectees</span><span id="d-functions" class="status-pending">--</span></div>
-      <div class="debug-row"><span class="debug-label">Memoire messages</span><span id="d-memory">--</span></div>
-      <button class="run-test" id="runTest">[ lancer le test ]</button>
-    </section>
-
-    <section id="settings" class="panel hidden">
-      <label>Modele<select id="modelSelect"></select></label>
-      <label>Prompt systeme<textarea id="systemPrompt" rows="3">Tu es une IA utile, concise et claire. Reponds en francais.</textarea></label>
-      <label>Memoire — faits persistants<textarea id="memoryFacts" rows="3" placeholder="Ton prenom, tes projets..."></textarea></label>
-      <label>MCP tools (JSON)<textarea id="mcpConfig" rows="4" placeholder='[{"name":"meteo","description":"retourne la meteo","url":"https://..."}]'></textarea></label>
-      <div class="btn-row">
-        <button class="primary" id="saveSettings">[ sauvegarder ]</button>
-        <button class="danger-btn" id="clearChat">[ effacer ]</button>
+      <div class="sidebar-section">
+        <div class="section-label">Outils MCP actifs</div>
+        <div id="mcpActiveList" class="mcp-active-list"></div>
+        <button class="sidebar-btn" id="openMcpPanel">+ Ajouter outil</button>
       </div>
-    </section>
 
-    <main id="chat" class="chat"></main>
+      <div class="sidebar-section">
+        <div class="section-label">Actions rapides</div>
+        <button class="sidebar-btn" id="sidebarSearch">🔍 Recherche web</button>
+        <button class="sidebar-btn" id="sidebarBrowse">🌐 Lire une URL</button>
+        <button class="sidebar-btn" id="sidebarCode">⚙ Generer du code</button>
+      </div>
 
-    <form id="composer" class="composer">
-      <textarea id="messageInput" rows="1" placeholder="..."></textarea>
-      <button type="submit">envoyer</button>
-    </form>
+      <div class="sidebar-section">
+        <div class="section-label">Logs</div>
+        <div id="logList" class="log-list"></div>
+        <button class="sidebar-btn danger" id="clearChat">✕ Effacer</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="openSidebar" title="Menu">☰</button>
+        <div class="topbar-center">
+          <select id="modelSelect" class="model-select"></select>
+        </div>
+        <button class="icon-btn" id="toggleSettings" title="Config">⚙</button>
+      </header>
+
+      <!-- SETTINGS PANEL -->
+      <div id="settingsPanel" class="overlay-panel hidden">
+        <div class="panel-header">
+          <span>Configuration</span>
+          <button class="icon-btn" id="closeSettings">✕</button>
+        </div>
+        <label>Prompt systeme
+          <textarea id="systemPrompt" rows="4">Tu es une IA experte, precise et concise. Tu reponds en francais. Quand on te demande de rechercher ou de lire une page, utilise les outils disponibles.</textarea>
+        </label>
+        <label>Memoire persistante
+          <textarea id="memoryFacts" rows="3" placeholder="Ton prenom, contexte projet..."></textarea>
+        </label>
+        <label>SearXNG URL (optionnel)
+          <input type="text" id="searxngUrl" placeholder="https://ton-searxng.com" />
+        </label>
+        <label>Terminal webhook (optionnel)
+          <input type="text" id="terminalUrl" placeholder="https://ton-vps.com/exec" />
+        </label>
+        <button class="btn-primary" id="saveSettings">Sauvegarder</button>
+      </div>
+
+      <!-- MCP PANEL -->
+      <div id="mcpPanel" class="overlay-panel hidden">
+        <div class="panel-header">
+          <span>Ajouter un outil MCP</span>
+          <button class="icon-btn" id="closeMcpPanel">✕</button>
+        </div>
+        <label>Nom (mot cle declencheur)
+          <input type="text" id="mcpName" placeholder="ex: meteo" />
+        </label>
+        <label>Description
+          <input type="text" id="mcpDesc" placeholder="retourne la meteo actuelle" />
+        </label>
+        <label>URL endpoint
+          <input type="text" id="mcpUrl" placeholder="https://..." />
+        </label>
+        <label>Methode
+          <select id="mcpMethod"><option>POST</option><option>GET</option></select>
+        </label>
+        <label>Headers JSON (optionnel)
+          <input type="text" id="mcpHeaders" placeholder='{"Authorization": "Bearer token"}' />
+        </label>
+        <div class="mcp-presets">
+          <div class="section-label">Presets rapides</div>
+          <button class="preset-btn" data-preset="search">🔍 Recherche web</button>
+          <button class="preset-btn" data-preset="browse">🌐 Lire URL</button>
+          <button class="preset-btn" data-preset="terminal">⚙ Terminal VPS</button>
+        </div>
+        <button class="btn-primary" id="saveMcp">Ajouter</button>
+        <div id="mcpList" class="mcp-list"></div>
+      </div>
+
+      <!-- CHAT -->
+      <main id="chat" class="chat"></main>
+
+      <!-- COMPOSER -->
+      <form id="composer" class="composer">
+        <div class="composer-tools">
+          <button type="button" class="tool-btn" id="btnSearch" title="Recherche web">🔍</button>
+          <button type="button" class="tool-btn" id="btnBrowse" title="Lire URL">🌐</button>
+          <button type="button" class="tool-btn" id="btnCode" title="Code">⚙</button>
+        </div>
+        <textarea id="messageInput" rows="1" placeholder="Message..."></textarea>
+        <button type="submit" class="send-btn">↑</button>
+      </form>
+    </div>
   </div>
   <script src="app.js"></script>
 </body>
