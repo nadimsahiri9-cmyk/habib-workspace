@@ -3,3 +3,4 @@ secrets.json
 credentials.json
 *.db
 mobile-ai-chat
+.secrets/
