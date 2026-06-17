@@ -1,0 +1,5 @@
+secrets.json
+.env
+credentials.json
+*.db
+mobile-ai-chat

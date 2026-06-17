@@ -1,0 +1,5 @@
+:18790 {
+    root * /home/node/.openclaw/workspace/health-page
+    file_server
+    header Access-Control-Allow-Origin *
+}

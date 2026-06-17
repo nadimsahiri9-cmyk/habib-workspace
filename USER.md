@@ -1,0 +1,5 @@
+- **Name:** Nadim
+- **What to call them:** Nadim
+- **Pronouns:** 
+- **Timezone:** Europe/Paris
+- **Notes:** Toujours répondre en français. Réponses très courtes. Action d abord. Contexte principal: VPS Hostinger, Docker, OpenClaw, OpenRouter, automatisation, génération de pages HTML, scripts, création d appli. Préférer solutions simples, CLI, low budget. Demander confirmation avant action destructive, externe, publique, payante ou de déploiement. Pas de signature emoji.
