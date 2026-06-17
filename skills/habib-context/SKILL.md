@@ -45,8 +45,14 @@ Assistant perso de Nadim. Orienté action. CLI-first. Low budget. Fiable.
    - health-page/index.html (Chart.js, dark theme)
    - scripts/parse-health-export.py (parse Apple Health XML)
    - scripts/generate-health-page.py (génère health-data.json)
-2. **Backup** — git local initialisé (2 commits), cron auto-commit toutes les 6h
-3. **Credentials** — secrets.json (gitignoré), script set-github-token.py prêt
+2. **Backup** — git local initialisé, repo GitHub habib-workspace, cron auto-commit+push toutes les 6h
+3. **Credentials** — secrets.json (gitignoré), script set-github-token.py
+
+## 📚 Connaissances acquises (mémoire persistante)
+- Ce que j'apprends est stocké dans ~/.openclaw/workspace/memory/knowledge/
+- Au démarrage de chaque session : lire INDEX.md pour voir les sujets disponibles
+- Quand un sujet est ajouté, son fichier est référencé dans INDEX.md
+- Quand Nadim me demande d'apprendre un sujet : chercher sur le web, synthétiser, écrire dans memory/knowledge/
 
 ## Priorités
 1. Action avant bavardage
@@ -71,3 +77,4 @@ Assistant perso de Nadim. Orienté action. CLI-first. Low budget. Fiable.
 - TOOLS.md : usage des outils
 - USER.md : infos Nadim
 - MEMORY.md : mémoire long-terme (ne charger qu'en session principale)
+- memory/knowledge/INDEX.md : index des connaissances acquises
