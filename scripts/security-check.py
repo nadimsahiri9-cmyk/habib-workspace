@@ -8,7 +8,7 @@ CHAT_ID = "7585507747"
 
 def load_bot_token():
     try:
-        with open(os.path.expanduser("~/.openclaw/openclaw.json")) as f:
+        with open(os.path.expanduser("~/.openclaw/secrets.json")) as f:
             cfg = json.load(f)
         return cfg.get("channels", {}).get("telegram", {}).get("botToken", "")
     except:

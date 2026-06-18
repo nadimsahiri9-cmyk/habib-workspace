@@ -2,14 +2,17 @@
 """Monitoring : check que les services répondent, alerte Telegram si down."""
 import json, urllib.request, sys, os
 
-CONFIG_PATH = os.path.expanduser("~/.openclaw/openclaw.json")
+SECRETS_PATH = os.path.expanduser("~/.openclaw/secrets.json")
 WORKSPACE = os.path.expanduser("~/.openclaw/workspace")
 CHAT_ID = "7585507747"
 
 def load_bot_token():
-    with open(CONFIG_PATH) as f:
-        cfg = json.load(f)
-    return cfg.get("channels", {}).get("telegram", {}).get("botToken", "")
+    try:
+        with open(SECRETS_PATH) as f:
+            cfg = json.load(f)
+        return cfg.get("channels", {}).get("telegram", {}).get("botToken", "")
+    except:
+        return ""
 
 def check_url(url, name, timeout=5):
     try:
