@@ -1,1 +1,1 @@
-{"health-page": {"ok": false, "err": "<urlopen error [Errno 111] Connection refused>"}}
+{"health-page": {"ok": true, "err": null}}

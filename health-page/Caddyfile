@@ -1,18 +1,26 @@
 :18790 {
-    # Dashboard OpenClaw
-    handle_path /dashboard* {
-        reverse_proxy http://localhost:18789
+    # Proxy vers le dashboard OpenClaw
+    handle /dashboard* {
+        reverse_proxy http://localhost:18789 {
+            header_up Host localhost
+        }
     }
 
-    # Health page
-    handle_path /health* {
+    # Health page statique
+    handle /health* {
         root * /home/node/.openclaw/workspace/health-page
+        try_files {path} /index.html
         file_server
-        header Access-Control-Allow-Origin *
     }
 
-    # Par défaut : le dashboard
+    # Par défaut : proxy dashboard
     handle {
-        reverse_proxy http://localhost:18789
+        reverse_proxy http://localhost:18789 {
+            header_up Host localhost
+        }
+    }
+
+    log {
+        output file /home/node/.openclaw/caddy-access.log
     }
 }
