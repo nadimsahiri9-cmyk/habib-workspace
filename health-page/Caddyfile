@@ -1,5 +1,18 @@
 :18790 {
-    root * /home/node/.openclaw/workspace/health-page
-    file_server
-    header Access-Control-Allow-Origin *
+    # Dashboard OpenClaw
+    handle_path /dashboard* {
+        reverse_proxy http://localhost:18789
+    }
+
+    # Health page
+    handle_path /health* {
+        root * /home/node/.openclaw/workspace/health-page
+        file_server
+        header Access-Control-Allow-Origin *
+    }
+
+    # Par défaut : le dashboard
+    handle {
+        reverse_proxy http://localhost:18789
+    }
 }
